@@ -142,13 +142,13 @@ ankijp_init() {
 
     ANKI_JP_RTK_DECK=$(ankijp_prompt "RTK deck" "Existing deck name" "${ANKI_JP_RTK_DECK:-}")
     ANKI_JP_RTK_MODEL=$(ankijp_prompt "RTK card type" "Existing card type name" "${ANKI_JP_RTK_MODEL:-RTK}")
-    mapfile -t rtk_fields < <("$anki_bin" cardtype fields "$ANKI_JP_RTK_MODEL")
+    mapfile -t rtk_fields < <("$anki_bin" cardtype fields list --cardtype "$ANKI_JP_RTK_MODEL")
     ANKI_JP_RTK_KEYWORD_FIELD=$(ankijp_prompt "RTK keyword field" "Field for the English keyword" "${ANKI_JP_RTK_KEYWORD_FIELD:-}")
     ANKI_JP_RTK_KANJI_FIELD=$(ankijp_prompt "RTK kanji field" "Field for the kanji" "${ANKI_JP_RTK_KANJI_FIELD:-}")
 
     ANKI_JP_WW_DECK=$(ankijp_prompt "WordWrite deck" "Existing deck name" "${ANKI_JP_WW_DECK:-}")
     ANKI_JP_WW_MODEL=$(ankijp_prompt "WordWrite card type" "Existing card type name" "${ANKI_JP_WW_MODEL:-WordWrite}")
-    mapfile -t ww_fields < <("$anki_bin" cardtype fields "$ANKI_JP_WW_MODEL")
+    mapfile -t ww_fields < <("$anki_bin" cardtype fields list --cardtype "$ANKI_JP_WW_MODEL")
     ANKI_JP_WW_READING_FIELD=$(ankijp_prompt "WordWrite reading field" "Field for the hiragana reading" "${ANKI_JP_WW_READING_FIELD:-}")
     ANKI_JP_WW_DEFINITION_FIELD=$(ankijp_prompt "WordWrite definition field" "Optional short definition field; leave blank if unused" "${ANKI_JP_WW_DEFINITION_FIELD:-}")
     ANKI_JP_WW_KANJI_FIELD=$(ankijp_prompt "WordWrite kanji field" "Field for the kanji word" "${ANKI_JP_WW_KANJI_FIELD:-}")
@@ -183,8 +183,8 @@ ankijp_add_rtk() {
     "$anki_bin" card add \
         --deck "$ANKI_JP_RTK_DECK" \
         --cardtype "$ANKI_JP_RTK_MODEL" \
-        --field "${ANKI_JP_RTK_KEYWORD_FIELD}=${keyword}" \
-        --field "${ANKI_JP_RTK_KANJI_FIELD}=${kanji}"
+        --field "$ANKI_JP_RTK_KEYWORD_FIELD" "$keyword" \
+        --field "$ANKI_JP_RTK_KANJI_FIELD" "$kanji"
 }
 
 ankijp_add_wordwrite() {
@@ -243,13 +243,13 @@ ankijp_add_wordwrite() {
     args+=(
         --deck "$ANKI_JP_WW_DECK"
         --cardtype "$ANKI_JP_WW_MODEL"
-        --field "${ANKI_JP_WW_READING_FIELD}=${reading}"
-        --field "${ANKI_JP_WW_KANJI_FIELD}=${kanji}"
+        --field "$ANKI_JP_WW_READING_FIELD" "$reading"
+        --field "$ANKI_JP_WW_KANJI_FIELD" "$kanji"
     )
 
     if [ -n "$definition" ]; then
         [ -n "$ANKI_JP_WW_DEFINITION_FIELD" ] || ankijp_die "a definition was provided, but no WordWrite definition field is configured; rerun 'anki-jp init'"
-        args+=(--field "${ANKI_JP_WW_DEFINITION_FIELD}=${definition}")
+        args+=(--field "$ANKI_JP_WW_DEFINITION_FIELD" "$definition")
     fi
 
     "$anki_bin" card add "${args[@]}"

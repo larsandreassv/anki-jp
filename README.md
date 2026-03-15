@@ -93,5 +93,5 @@ explicit reading form.
 
 - `anki deck list`
 - `anki cardtype list`
-- `anki cardtype fields <cardtype>`
+- `anki cardtype fields list --cardtype <cardtype>`
 - `anki card add ...`
