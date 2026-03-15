@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+LIB_ROOT=''
+
+for candidate in \
+    "${ANKI_JP_DATA_DIR:-}/lib" \
+    "$SCRIPT_DIR/../lib" \
+    "${XDG_DATA_HOME:-$HOME/.local/share}/anki-jp/lib"
+do
+    if [ -f "$candidate/anki-jp/common.sh" ]; then
+        LIB_ROOT=$candidate
+        break
+    fi
+done
+
+[ -n "$LIB_ROOT" ] || {
+    printf 'error: unable to locate anki-jp library files\n' >&2
+    exit 1
+}
+
+# shellcheck source=../lib/anki-jp/common.sh
+. "$LIB_ROOT/anki-jp/common.sh"
+
+usage() {
+    cat <<'EOF'
+Usage:
+  anki-jp init
+  anki-jp rtk [keyword] [kanji]
+  anki-jp ww [reading] [kanji] [definition]
+  anki-jp wordwrite [reading] [kanji] [definition]
+
+Examples:
+  anki-jp init
+  anki-jp rtk festival 祭
+  anki-jp ww まつり 祭り festival
+EOF
+}
+
+cmd=${1:-help}
+[ "$#" -gt 0 ] && shift || true
+
+case "$cmd" in
+    --help|-h|help)
+        usage
+        ;;
+    init)
+        [ "$#" -eq 0 ] || ankijp_die "usage: anki-jp init"
+        ankijp_init
+        ;;
+    rtk)
+        [ "$#" -le 2 ] || ankijp_die "usage: anki-jp rtk [keyword] [kanji]"
+        ankijp_add_rtk "$@"
+        ;;
+    ww|wordwrite)
+        [ "$#" -le 3 ] || ankijp_die "usage: anki-jp ww [reading] [kanji] [definition]"
+        ankijp_add_wordwrite "$@"
+        ;;
+    *)
+        ankijp_die "unknown command: $cmd"
+        ;;
+esac
