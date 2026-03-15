@@ -57,6 +57,48 @@ ankijp_prompt() {
     fi
 }
 
+ankijp_kakasi_bin() {
+    local candidate=${ANKI_JP_KAKASI_BIN:-}
+
+    if [ -n "$candidate" ]; then
+        [ -x "$candidate" ] || ankijp_die "ANKI_JP_KAKASI_BIN is set but not executable: $candidate"
+        printf '%s\n' "$candidate"
+        return 0
+    fi
+
+    candidate=$(command -v kakasi || true)
+    [ -n "$candidate" ] || return 1
+    printf '%s\n' "$candidate"
+}
+
+ankijp_text_is_kana() {
+    local text=$1
+    [ -n "$text" ] || return 1
+    printf '%s\n' "$text" | grep -Pq '^[\p{Hiragana}\p{Katakana}ー・ヽヾゝゞ]+$'
+}
+
+ankijp_text_to_hiragana() {
+    local text=$1
+    local kakasi_bin output
+
+    [ -n "$text" ] || {
+        printf '\n'
+        return 0
+    }
+
+    kakasi_bin=$(ankijp_kakasi_bin) || return 1
+    output=$(printf '%s\n' "$text" | "$kakasi_bin" -JH -KH -i utf8 -o utf8) || ankijp_die "kakasi failed to convert text: $text"
+    printf '%s\n' "$output" | tr -d '[:space:]'
+}
+
+ankijp_require_hiragana() {
+    local text=$1
+    local output
+
+    output=$(ankijp_text_to_hiragana "$text") || ankijp_die "kakasi is required for automatic reading conversion; install kakasi or provide the reading explicitly"
+    printf '%s\n' "$output"
+}
+
 ankijp_validate_value_in_list() {
     local label=$1
     local needle=$2
@@ -150,13 +192,49 @@ ankijp_add_wordwrite() {
     anki_bin=$(ankijp_anki_bin)
     ankijp_load_config
 
-    local reading=${1:-}
-    local kanji=${2:-}
-    local definition=${3:-}
+    local arg1=${1:-}
+    local arg2=${2:-}
+    local arg3=${3:-}
+    local reading=''
+    local kanji=''
+    local definition=''
+    local reading_default=''
     local args=()
 
-    [ -n "$reading" ] || reading=$(ankijp_prompt "Reading" "Hiragana reading")
-    [ -n "$kanji" ] || kanji=$(ankijp_prompt "Kanji" "Word written with kanji")
+    case "$#" in
+        0)
+            ;;
+        1)
+            if ankijp_text_is_kana "$arg1"; then
+                reading=$arg1
+            else
+                kanji=$arg1
+                reading=$(ankijp_require_hiragana "$kanji")
+            fi
+            ;;
+        2)
+            if ankijp_text_is_kana "$arg1"; then
+                reading=$arg1
+                kanji=$arg2
+            else
+                kanji=$arg1
+                definition=$arg2
+                reading=$(ankijp_require_hiragana "$kanji")
+            fi
+            ;;
+        3)
+            reading=$arg1
+            kanji=$arg2
+            definition=$arg3
+            ;;
+    esac
+
+    [ -n "$kanji" ] || kanji=$(ankijp_prompt "Written form" "Word written with kanji or kana")
+
+    if [ -z "$reading" ]; then
+        reading_default=$(ankijp_text_to_hiragana "$kanji" || true)
+        reading=$(ankijp_prompt "Reading" "Hiragana reading" "$reading_default")
+    fi
 
     if [ -n "$ANKI_JP_WW_DEFINITION_FIELD" ] && [ -z "$definition" ]; then
         definition=$(ankijp_prompt "Definition" "Optional short definition")

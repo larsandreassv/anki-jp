@@ -9,6 +9,7 @@ This repo provides the study-specific layer that used to live inside the core re
 - `bash`
 - installed `anki` core CLI available on `PATH`
 - Anki running locally with the AnkiConnect add-on enabled
+- recommended: `kakasi` for automatic Japanese-to-hiragana conversion in `anki-jp ww`
 - optional: `gum` for nicer prompts during `anki-jp init` and missing-field entry
 
 ## Install
@@ -65,11 +66,25 @@ Adds an RTK note using the configured deck/model/field mapping.
 
 Adds a WordWrite note using the configured deck/model/field mapping.
 
+Supported forms:
+
+```sh
+anki-jp ww まつり 祭り festival   # explicit reading + written form + definition
+anki-jp ww まつり 祭り           # explicit reading + written form
+anki-jp ww 祭り festival         # auto-derive reading with kakasi
+anki-jp ww 祭り                  # auto-derive reading, prompt for definition if configured
+```
+
+When `kakasi` is installed, `anki-jp` can derive the hiragana reading from the
+written form automatically. If `kakasi` is not installed, keep using the
+explicit reading form.
+
 ## Environment
 
 - `ANKI_BIN`: override the `anki` binary path used by `anki-jp`
 - `ANKI_JP_CONFIG`: override the config file path
 - `ANKI_JP_DATA_DIR`: override where `anki-jp` looks for installed library files
+- `ANKI_JP_KAKASI_BIN`: override the `kakasi` binary path used for auto conversion
 - `ANKI_JP_DISABLE_GUM=1`: force plain shell prompts even if `gum` is installed
 
 ## How it integrates with `anki`

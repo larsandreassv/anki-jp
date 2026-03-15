@@ -58,6 +58,15 @@ Installed:
 Make sure $BIN_DIR is on your PATH.
 EOF
 
+if ! command -v kakasi >/dev/null 2>&1; then
+    cat <<'EOF'
+
+Tip:
+  Install `kakasi` to enable automatic Japanese-to-hiragana conversion for
+  shorter `anki-jp ww` commands.
+EOF
+fi
+
 default_data_dir="${XDG_DATA_HOME:-$HOME/.local/share}/anki-jp"
 if [ "$DATA_DIR" != "$default_data_dir" ]; then
     cat <<EOF

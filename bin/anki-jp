@@ -29,12 +29,15 @@ Usage:
   anki-jp init
   anki-jp rtk [keyword] [kanji]
   anki-jp ww [reading] [kanji] [definition]
+  anki-jp ww [kanji] [definition]
   anki-jp wordwrite [reading] [kanji] [definition]
 
 Examples:
   anki-jp init
   anki-jp rtk festival 祭
   anki-jp ww まつり 祭り festival
+  anki-jp ww 祭り festival
+  anki-jp ww 祭り
 EOF
 }
 
