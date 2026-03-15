@@ -47,9 +47,9 @@ anki-jp wordwrite まつり 祭り festival
 
 Interactive setup for:
 
-- RTK deck and model
+- RTK deck and card type
 - RTK keyword and kanji fields
-- WordWrite deck and model
+- WordWrite deck and card type
 - WordWrite reading, optional definition, and kanji fields
 
 Configuration is stored in:
@@ -60,11 +60,11 @@ Configuration is stored in:
 
 ### `anki-jp rtk`
 
-Adds an RTK note using the configured deck/model/field mapping.
+Adds an RTK card using the configured deck/card type/field mapping.
 
 ### `anki-jp ww` / `anki-jp wordwrite`
 
-Adds a WordWrite note using the configured deck/model/field mapping.
+Adds a WordWrite card using the configured deck/card type/field mapping.
 
 Supported forms:
 
@@ -92,6 +92,6 @@ explicit reading form.
 `anki-jp` uses the core CLI for all Anki operations:
 
 - `anki deck list`
-- `anki model list`
-- `anki model fields <model>`
-- `anki note add ...`
+- `anki cardtype list`
+- `anki cardtype fields <cardtype>`
+- `anki card add ...`

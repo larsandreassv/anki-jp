@@ -136,29 +136,29 @@ ankijp_init() {
     local anki_bin
     anki_bin=$(ankijp_anki_bin)
 
-    local deck_names model_names rtk_fields ww_fields
+    local deck_names cardtype_names rtk_fields ww_fields
     mapfile -t deck_names < <("$anki_bin" deck list)
-    mapfile -t model_names < <("$anki_bin" model list)
+    mapfile -t cardtype_names < <("$anki_bin" cardtype list)
 
     ANKI_JP_RTK_DECK=$(ankijp_prompt "RTK deck" "Existing deck name" "${ANKI_JP_RTK_DECK:-}")
-    ANKI_JP_RTK_MODEL=$(ankijp_prompt "RTK model" "Existing note type name" "${ANKI_JP_RTK_MODEL:-RTK}")
-    mapfile -t rtk_fields < <("$anki_bin" model fields "$ANKI_JP_RTK_MODEL")
+    ANKI_JP_RTK_MODEL=$(ankijp_prompt "RTK card type" "Existing card type name" "${ANKI_JP_RTK_MODEL:-RTK}")
+    mapfile -t rtk_fields < <("$anki_bin" cardtype fields "$ANKI_JP_RTK_MODEL")
     ANKI_JP_RTK_KEYWORD_FIELD=$(ankijp_prompt "RTK keyword field" "Field for the English keyword" "${ANKI_JP_RTK_KEYWORD_FIELD:-}")
     ANKI_JP_RTK_KANJI_FIELD=$(ankijp_prompt "RTK kanji field" "Field for the kanji" "${ANKI_JP_RTK_KANJI_FIELD:-}")
 
     ANKI_JP_WW_DECK=$(ankijp_prompt "WordWrite deck" "Existing deck name" "${ANKI_JP_WW_DECK:-}")
-    ANKI_JP_WW_MODEL=$(ankijp_prompt "WordWrite model" "Existing note type name" "${ANKI_JP_WW_MODEL:-WordWrite}")
-    mapfile -t ww_fields < <("$anki_bin" model fields "$ANKI_JP_WW_MODEL")
+    ANKI_JP_WW_MODEL=$(ankijp_prompt "WordWrite card type" "Existing card type name" "${ANKI_JP_WW_MODEL:-WordWrite}")
+    mapfile -t ww_fields < <("$anki_bin" cardtype fields "$ANKI_JP_WW_MODEL")
     ANKI_JP_WW_READING_FIELD=$(ankijp_prompt "WordWrite reading field" "Field for the hiragana reading" "${ANKI_JP_WW_READING_FIELD:-}")
     ANKI_JP_WW_DEFINITION_FIELD=$(ankijp_prompt "WordWrite definition field" "Optional short definition field; leave blank if unused" "${ANKI_JP_WW_DEFINITION_FIELD:-}")
     ANKI_JP_WW_KANJI_FIELD=$(ankijp_prompt "WordWrite kanji field" "Field for the kanji word" "${ANKI_JP_WW_KANJI_FIELD:-}")
 
     ankijp_validate_value_in_list "RTK deck" "$ANKI_JP_RTK_DECK" "${deck_names[@]}"
-    ankijp_validate_value_in_list "RTK model" "$ANKI_JP_RTK_MODEL" "${model_names[@]}"
+    ankijp_validate_value_in_list "RTK card type" "$ANKI_JP_RTK_MODEL" "${cardtype_names[@]}"
     ankijp_validate_value_in_list "RTK keyword field" "$ANKI_JP_RTK_KEYWORD_FIELD" "${rtk_fields[@]}"
     ankijp_validate_value_in_list "RTK kanji field" "$ANKI_JP_RTK_KANJI_FIELD" "${rtk_fields[@]}"
     ankijp_validate_value_in_list "WordWrite deck" "$ANKI_JP_WW_DECK" "${deck_names[@]}"
-    ankijp_validate_value_in_list "WordWrite model" "$ANKI_JP_WW_MODEL" "${model_names[@]}"
+    ankijp_validate_value_in_list "WordWrite card type" "$ANKI_JP_WW_MODEL" "${cardtype_names[@]}"
     ankijp_validate_value_in_list "WordWrite reading field" "$ANKI_JP_WW_READING_FIELD" "${ww_fields[@]}"
     if [ -n "$ANKI_JP_WW_DEFINITION_FIELD" ]; then
         ankijp_validate_value_in_list "WordWrite definition field" "$ANKI_JP_WW_DEFINITION_FIELD" "${ww_fields[@]}"
@@ -180,9 +180,9 @@ ankijp_add_rtk() {
     [ -n "$keyword" ] || keyword=$(ankijp_prompt "Keyword" "English keyword")
     [ -n "$kanji" ] || kanji=$(ankijp_prompt "Kanji" "Single kanji or text")
 
-    "$anki_bin" note add \
+    "$anki_bin" card add \
         --deck "$ANKI_JP_RTK_DECK" \
-        --model "$ANKI_JP_RTK_MODEL" \
+        --cardtype "$ANKI_JP_RTK_MODEL" \
         --field "${ANKI_JP_RTK_KEYWORD_FIELD}=${keyword}" \
         --field "${ANKI_JP_RTK_KANJI_FIELD}=${kanji}"
 }
@@ -242,7 +242,7 @@ ankijp_add_wordwrite() {
 
     args+=(
         --deck "$ANKI_JP_WW_DECK"
-        --model "$ANKI_JP_WW_MODEL"
+        --cardtype "$ANKI_JP_WW_MODEL"
         --field "${ANKI_JP_WW_READING_FIELD}=${reading}"
         --field "${ANKI_JP_WW_KANJI_FIELD}=${kanji}"
     )
@@ -252,5 +252,5 @@ ankijp_add_wordwrite() {
         args+=(--field "${ANKI_JP_WW_DEFINITION_FIELD}=${definition}")
     fi
 
-    "$anki_bin" note add "${args[@]}"
+    "$anki_bin" card add "${args[@]}"
 }
